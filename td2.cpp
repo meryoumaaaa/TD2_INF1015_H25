@@ -183,7 +183,17 @@ ListeFilms creerListe(string nomFichier)
 }
 
 //TODO: Une fonction pour détruire un film (relâcher toute la mémoire associée à ce film, et les acteurs qui ne jouent plus dans aucun films de la collection).  Noter qu'il faut enleve le film détruit des films dans lesquels jouent les acteurs.  Pour fins de débogage, affichez les noms des acteurs lors de leur destruction.
-
+void detruireFilm(Film* film) {
+for (Acteur* acteur : span(film->acteurs.elements, film->acteurs.nElements)) {
+enleverFilm(acteur->joueDans.nElements==0){
+delete[] acteur->joueDans.elements;
+cout << "Destructeur de l'acteur: " << acteur->nom << endl;
+delete acteur;
+}
+}
+delete[] film->acteurs.elements;
+delete film;
+}
 //TODO: Une fonction pour détruire une ListeFilms et tous les films qu'elle contient.
 
 void afficherActeur(const Acteur& acteur)
