@@ -49,114 +49,69 @@ string lireString(istream& fichier)
 #pragma endregion//}
 
 void ajouterActeur(ListeActeurs& listeActeurs, Acteur* acteur) {
-
-	Acteur** elementsListeActeurs = {};
-
-	listeActeurs.nElements++;
-
-	if (listeActeurs.capacite != 0) {
-
-		if (listeActeurs.nElements > listeActeurs.capacite) {
-
-			listeActeurs.capacite *= 2;
-			elementsListeActeurs = new Acteur * [listeActeurs.capacite];
-			for (int i : range(listeActeurs.nElements)) {
-				elementsListeActeurs[i] = listeActeurs.elements[i];
-			}
+	if (!acteur) return;
+		if (listeActeurs.nElements >= listeActeurs.capacite) {
+			listeActeurs.capacite = (listeActeurs.capacite==0) ? 1 : listeActeurs.capacite * 2;
+			auto nouvelleListe = new Acteur * [listeActeurs.capacite];
+			copy(listeActeurs.elements, listeActeurs.elements+listeActeurs.nElements, nouvelleListe);
 			delete[] listeActeurs.elements;
-			listeActeurs.elements = elementsListeActeurs;
+			listeActeurs.elements = nouvelleListe;
 		}
+	listeActeurs.elements[listeActeurs.nElements++]=acteur;
 	}
-	else {
-
-		listeActeurs.capacite++;
-		elementsListeActeurs = new Acteur * [listeActeurs.capacite];
-		delete[] listeActeurs.elements;
-		listeActeurs.elements = elementsListeActeurs;
-	}
-
-	listeActeurs.elements[listeActeurs.nElements - 1] = acteur;
-}
 
 void ajouterFilm(ListeFilms& listeFilms, Film* film) {
-
-	Film** elementsListeFilms = {};
-
-	listeFilms.nElements++;
-
+if (!film) return;
 	if (listeFilms.capacite != 0) {
-
-		if (listeFilms.nElements > listeFilms.capacite) {
-
-			listeFilms.capacite *= 2;
-			elementsListeFilms = new Film * [listeFilms.capacite];
-			for (int i : range(listeFilms.nElements)) {
-				elementsListeFilms[i] = listeFilms.elements[i];
-			}
+		if (listeFilms.nElements >= listeFilms.capacite) {
+			listeFilms.capacite=(listeFilms.capacite==0) ? 1: listeFilms.capacite *= 2;
+			auto nouvelleListe= new Film*[listeFilms.capacite];
+			copy(listeFilms.elements, listeFilms.elements+listeFilms.nElements, nouvelleListe);
 			delete[] listeFilms.elements;
-			listeFilms.elements = elementsListeFilms;
+			listeFilms.elements = nouvelleListe;
 		}
-	}
-	else {
-
-		listeFilms.capacite++;
-		elementsListeFilms = new Film * [listeFilms.capacite];
-		delete[] listeFilms.elements;
-		listeFilms.elements = elementsListeFilms;
+		listeFilms.elements[listeFilms.nElements++] = film;
 	}
 
-	listeFilms.elements[listeFilms.nElements - 1] = film;
-}
 
-void enleverFilm(ListeFilms& listeFilms, Film* film)
-{
-	listeFilms.nElements--;
-
-	for (int i : range(listeFilms.nElements)) {
+void enleverFilm(ListeFilms& listeFilms, Film* film){
+	if (!film) return;
+	for (int i = 0; i < listeFilms.nElements; i++) {
 		if (listeFilms.elements[i] == film) {
-			listeFilms.elements[i] = listeFilms.elements[listeFilms.nElements - 1];
-			delete listeFilms.elements[listeFilms.nElements - 1];
+			listeFilms.elements[i] = listeFilms.elements[--listeFilms.nElements];
+			delete film;
 			break;
 		}
 	}
 }
 
-Acteur* trouverActeur(const ListeFilms& listeFilms, const string& nomActeur)
-{
-	Acteur* ptrActeur = nullptr;
-	// Il faudrait essayer d'implementer span pour films
-	for (Film* film : span(listeFilms.elements, listeFilms.nElements)) {
-		// Il faudrait essayer d'implementer span pour acteurs
-		for (Acteur* acteur : span(film->acteurs.elements, film->acteurs.nElements)) {
+Acteur* trouverActeur(const ListeFilms& listeFilms, const string& nomActeur){
+	for (auto film: span(listeFilms.elements, listeFilms.nElements)) {
+		for (auto acteur :  span(film->acteurs.elements, film->acteurs.nElements)){
 			if (acteur->nom == nomActeur) {
-				ptrActeur = acteur;
-				break;
+				return acteur;
 			}
 		}
 	}
-	return ptrActeur;
+	return nullptr;
 }
 
-Acteur* lireActeur(ListeFilms& listeFilms, istream& fichier)
-{
+Acteur* lireActeur(ListeFilms& listeFilms, istream& fichier){
 	Acteur* acteur = new Acteur;
 
-	ListeFilms acteurListesFilms = {};
-	acteurListesFilms.capacite = 1;
-	acteurListesFilms.nElements = 0;
-	acteurListesFilms.elements = new Film * [acteurListesFilms.capacite];
+	//ListeFilms acteurListesFilms = {};
+	//acteurListesFilms.capacite = 1;
+	//acteurListesFilms.nElements = 0;
+	//acteurListesFilms.elements = new Film * [acteurListesFilms.capacite];
 
 	string nomActeur = lireString(fichier);
-	acteur->nom = nomActeur;
-	acteur->anneeNaissance = lireUint16(fichier);
-	acteur->sexe = lireUint8(fichier);
-	acteur->joueDans = acteurListesFilms;
-	if (trouverActeur(listeFilms, nomActeur) != nullptr) {
-		cout << "Nom de l'acteur (EXISTANT): " << trouverActeur(listeFilms, nomActeur)->nom << endl;
-		delete acteur;
-		return trouverActeur(listeFilms, nomActeur);
+	if (auto acteurExistant= trouverActeur(listeFilms,nomActeur)){
+		return ActeurExistant
+	//if (trouverActeur(listeFilms, nomActeur) != nullptr) {
+	//	cout << "Nom de l'acteur (EXISTANT): " << trouverActeur(listeFilms, nomActeur)->nom << endl;
+	//	return trouverActeur(listeFilms, nomActeur);
 	}
-	cout << "Nom de l'acteur (NOUVEAU): " << acteur->nom << endl;
+	auto acteur= new Acteur{nomActeur, lireUint16(fichier), lireUint8(fichier), ListeFilms{0,0,nullptr}}
 	return acteur;
 }
 
@@ -164,15 +119,14 @@ Film* lireFilm(ListeFilms& listeFilms, istream& fichier)
 {
 	Film* film = new Film;
 
-	film->titre = lireString(fichier); // Erreur ici à la 4eme iteration
+	film->titre = lireString(fichier);
 	film->realisateur = lireString(fichier);
 	film->anneeSortie = lireUint16(fichier);
 	film->recette = lireUint16(fichier);
-	film->acteurs.capacite = lireUint8(fichier);
+	//film->acteurs.capacite = lireUint8(fichier);
 	film->acteurs.nElements = 0;
 	film->acteurs.elements = new Acteur * [film->acteurs.capacite];
-
-	for (int i : range(film->acteurs.capacite)) {
+	for (int i=0; i < film->acteurs.capacite; i++) {
 		ajouterActeur(film->acteurs, lireActeur(listeFilms, fichier));
 		ajouterFilm(film->acteurs.elements[i]->joueDans, film);
 	}
@@ -221,7 +175,7 @@ void afficherFilm(const Film& film)
 void afficherListeFilms(const ListeFilms& listeFilms)
 {
 	//TODO: Utiliser des caractères Unicode pour définir la ligne de séparation (différente des autres lignes de séparations dans ce progamme).
-	static const string ligneDeSeparation = "\n";
+	static const string ligneDeSeparation = {};
 	cout << ligneDeSeparation;
 	//TODO: Changer le for pour utiliser un span.
 	for (Film* film : span(listeFilms.elements, listeFilms.nElements)) {
@@ -233,7 +187,7 @@ void afficherListeFilms(const ListeFilms& listeFilms)
 void afficherFilmographieActeur(const ListeFilms& listeFilms, const string& nomActeur)
 {
 	//TODO: Utiliser votre fonction pour trouver l'acteur (au lieu de le mettre à nullptr).
-	const Acteur* acteur = trouverActeur(listeFilms, nomActeur);
+	const Acteur* acteur = nullptr;
 	if (acteur == nullptr)
 		cout << "Aucun acteur de ce nom" << endl;
 	else
