@@ -82,12 +82,17 @@ void ajouterFilm(ListeFilms& listeFilms, Film* film) {
 	listeFilms.elements[listeFilms.nElements++] = film;
 }
 
-void enleverFilm(ListeFilms& listeFilms, Film* inputFilm)
-{
-	for (int i : range(listeFilms.nElements)) {
-		if (listeFilms.elements[i] == inputFilm) {
-			listeFilms.elements[i] = listeFilms.elements[listeFilms.nElements - 1];
-			//delete listeFilms.elements[listeFilms.nElements - 1];
+void enleverFilm(ListeFilms& listeFilms, Film* FilmASupprimer){
+	if (!film) return;
+	for (int i=0; i< listeFilms.nElements; i++) {
+		if (listeFilms.elements[i] == film) {
+			listeFilms.elements[i] = listeFilms.elements[--listeFilms.nElements];
+			delete film;
+			break;
+	for (Film* film : span(listeFilms.elements, listeFilms.nElements)) {
+		if (film == Film) {
+			film = listeFilms.elements[listeFilms.nElements - 1];
+			delete listeFilms.elements[listeFilms.nElements - 1];
 			listeFilms.nElements--;
 			break;
 		}
@@ -106,25 +111,13 @@ Acteur* trouverActeur(const ListeFilms& listeFilms, const string& nomActeur)
 	return nullptr;
 }
 
-Acteur* lireActeur(ListeFilms& listeFilms, istream& fichier)
-{
-	Acteur* acteur = new Acteur;
-
+Acteur* lireActeur(ListeFilms& listeFilms, istream& fichier){
 	string nomActeur = lireString(fichier);
-	acteur->nom = nomActeur;
-	acteur->anneeNaissance = lireUint16(fichier);
-	acteur->sexe = lireUint8(fichier);
-	if (trouverActeur(listeFilms, nomActeur) != nullptr) {
-		cout << "Nom de l'acteur (EXISTANT): " << trouverActeur(listeFilms, nomActeur)->nom << endl;
-		delete acteur;
-		return trouverActeur(listeFilms, nomActeur);
+	if (Acteur* ActeurExistant = trouverActeur(listeFilms, nomActeur)) {
+		cout << "Nom de l'acteur (EXISTANT): " << acteurExistant->nom << endl;
+		return acteurExistant;
 	}
-
-	ListeFilms acteurListesFilms = {};
-	acteurListesFilms.capacite = 1;
-	acteurListesFilms.nElements = 0;
-	acteurListesFilms.elements = new Film * [acteurListesFilms.capacite];
-	acteur->joueDans = acteurListesFilms;
+	Acteur* acteur = new Acteur{nomActeur, lireUint16(fichier), lireUint8(fichier), {0,0,nullptr}};
 	cout << "Nom de l'acteur (NOUVEAU): " << acteur->nom << endl;
 	return acteur;
 }
@@ -174,7 +167,13 @@ ListeFilms creerListe(string nomFichier)
 void detruireFilm(Film* film)
 {
 	for (Acteur* acteur : span(film->acteurs.elements, film->acteurs.nElements)) {
-		enleverFilm(acteur->joueDans, film);
+		//enleverFilm(acteur->joueDans, film);
+		for (Film* filmActeur : span(acteur->joueDans.elements, acteur->joueDans.nElements)) {
+			if (filmActeur == film) {
+				filmActeur = acteur->joueDans.elements[--acteur->joueDans.nElements];
+				break;
+			}
+		}
 		if (acteur->joueDans.nElements == 0) {
 			cout << "Destruction de l'acteur: " << acteur->nom << endl;
 			delete[] acteur->joueDans.elements;
@@ -188,7 +187,7 @@ void detruireFilm(Film* film)
 void detruireListeFilms(ListeFilms* listeFilms)
 {
 	for (Film* film : span(listeFilms->elements, listeFilms->nElements)) {
-		detruireFilm(film);
+		delete film;
 	}
 	delete listeFilms;
 }
@@ -250,13 +249,11 @@ int main()
 	afficherFilmographieActeur(listeFilms, "Benedict Cumberbatch");
 
 	detruireFilm(listeFilms.elements[0]);
-	enleverFilm(listeFilms, listeFilms.elements[0]);
 
 	cout << ligneDeSeparation << "Les films sont maintenant:" << endl;
-	afficherListeFilms(listeFilms);
+	//TODO: Afficher la liste des films.
 
 	//TODO: Faire les appels qui manquent pour avoir 0% de lignes non exécutées dans le programme (aucune ligne rouge dans la couverture de code; c'est normal que les lignes de "new" et "delete" soient jaunes).  Vous avez aussi le droit d'effacer les lignes du programmes qui ne sont pas exécutée, si finalement vous pensez qu'elle ne sont pas utiles.
-	//detruireListeFilms(&listeFilms);
 
 	//TODO: Détruire tout avant de terminer le programme.  La bibliothèque de verification_allocation devrait afficher "Aucune fuite detectee." a la sortie du programme; il affichera "Fuite detectee:" avec la liste des blocs, s'il manque des delete.
 }
