@@ -47,7 +47,22 @@ string lireString(istream& fichier)
 }
 
 #pragma endregion//}
-
+class listeFilms{
+private: 
+	int capacite_;
+	int nElements_;
+	Films** elements_;
+public:
+	ListeFilms(): capacite_(1), nElements_(0), elements(new Film*[1]) {}
+	ListeFilms(const string& nomFichier);
+	~ListeFilms();
+	void ajouterFilm(Film* film);
+	void enleverFilm(Film* film);
+	void ajouterActeur(ListeActeurs& listeActeurs, Acteur* acteur);
+	Acteur* trouverActeur(const string& nomActeur) const;
+	Film* lireFilm(istream& fichier);
+	Acteur* lireActeur(istream& fichier);
+	void afficherListeFilms() const;
 void ajouterActeur(ListeActeurs& listeActeurs, Acteur* acteur) {
 
 	if (listeActeurs.nElements >= listeActeurs.capacite) {
